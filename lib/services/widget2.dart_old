@@ -1,0 +1,338 @@
+//import 'dart:developer';
+import 'package:flutter/material.dart';
+import 'package:base_lib/all.dart';
+import 'package:intl/intl.dart';
+
+//import '../models/project_item_dto.dart';
+import 'xp.dart';
+
+/// static class(widget)
+class WG {
+
+  static const pagePad = EdgeInsets.all(10);
+
+  ///get appBar widget
+  ///@title title string
+  static AppBar appBar(String title) {
+    return AppBar(
+      toolbarHeight: 42,
+      title: WidgetUt.text(15, title, Colors.white),
+    );
+  }
+
+  ///display label & text
+  static Column labelText(String label, String text, [Color? color]) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        WidgetUt.text(14, label, Colors.grey),
+        WidgetUt.text(18, text, color),
+        WidgetUt.divider(),
+      ]
+    );
+  }
+
+  ///display label & text horizontal
+  static Row labelTextH(String label, String text, [Color? color]) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        WidgetUt.text(14, label, Colors.grey),
+        WidgetUt.text(18, text, color),
+        //WidgetUt.divider(),
+      ]
+    );
+  }
+
+  ///input field style
+  static TextStyle inputStyle([bool status = true]) {    
+    return TextStyle(
+      fontSize: 18,
+      color: status ? Colors.black : Colors.grey,
+    );
+  }
+
+  //return label
+  static InputDecoration inputLabel(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(
+        fontSize: 16,
+        color: Colors.grey,
+        height: 0.8,
+      ),
+    );
+  }
+
+  ///one button at form end/tail
+  static Container tailBtn(String text, [VoidCallback? fnOnClick, double? top]) {
+    var status = (fnOnClick != null);
+    return Container(
+        alignment: Alignment.center,
+        margin: (top == null) 
+          ? WidgetUt.gap(15) 
+          : EdgeInsets.only(top:top, right:15, bottom:15, left:15),
+        child: ElevatedButton(          
+          child: WidgetUt.text(16, text),
+          onPressed: status ? fnOnClick : null,
+        ));
+  }
+
+  //new
+  //統計表格資料列文字
+  static Text rowLabel(String label){
+    return WidgetUt.text(18, label);
+  }
+  //統計表格的值
+  static Text cellValue(int value, [Color? color]){
+    return WidgetUt.text(18, value.toString(), color);
+  }
+  
+  ///return empty message
+  static Widget emptyMsg(){
+    return const Center(child: Text('目前無任何資料。', 
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 18,
+        color: Colors.red,
+      ),
+    ));
+  }
+
+  ///create TextButton
+  ///VoidCallback is need, onPressed on ()=> before function !!
+  static Widget textBtn(String text, [VoidCallback? fnOnClick, Color? color]) {
+    var status = (fnOnClick != null);
+    var color2 = (!status) ? Colors.grey :
+      (color == null) ? Colors.blue :
+      color;
+      /*
+    return Center(child: TextButton(
+      child: WidgetUt.text(18, text, color2),
+      onPressed: status ? fnOnClick : null,
+    )); 
+    */
+    return TextButton(
+      child: WidgetUt.text(18, text, color2),
+      onPressed: status ? fnOnClick : null,
+    ); 
+  }
+
+  static TextButton linkBtn(String text, [VoidCallback? fnOnClick]) {
+  //static TextButton linkBtn(String text, [Function? fnOnClick]) {
+    var status = (fnOnClick != null);
+    var color = status
+      ? Colors.blue : Colors.grey;
+    return TextButton(
+      child: WidgetUt.text(18, text, color),
+      onPressed: status 
+        ? fnOnClick : null,
+    ); 
+  }
+
+  static Widget itext(String label, TextEditingController ctrl, 
+    [bool required = false, String? label2, Function? fnValid, Function? fnOnChange]){
+    
+    label2 = (label2 == null) 
+      ? label : label + label2;
+    return TextFormField(
+      controller: ctrl,
+      //initialValue: 'Taipei',
+      style: WG.inputStyle(),
+      decoration: WG.inputLabel(label2),
+      onChanged: (value){
+        (fnOnChange == null) ? null : fnOnChange(value);          
+      },
+      validator: (value) {
+        return (required && StrUt.isEmpty(value)) ? label + '不可空白。' :
+          (fnValid == null) ? null : 
+          fnValid(value);          
+      },
+    );
+  }
+
+  /*
+  static String first(List<IdStrDto> rows){
+    return (rows == null) ? '' : rows.first.id;
+  }
+  */
+
+  //fnOnChange無法使用name parameter !!
+  static Widget iselect(String label, String value, List<IdStrDto> rows,
+    Function? fnOnChange,
+    [bool required = false, String? label2]){
+
+    if (value == ''){
+      value = rows.first.id;
+    }
+
+    return InputDecorator(
+      //decoration: const InputDecoration(border: OutlineInputBorder()),
+      decoration: WG.inputLabel(label),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isDense: true,
+          isExpanded: true,
+          onChanged: (String? newValue){
+            if (fnOnChange != null) fnOnChange(newValue);
+          },
+          items: rows.map((IdStrDto row) {
+            return DropdownMenuItem<String>(
+              child: Text(row.str),
+              value: row.id,
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  static Widget idate(BuildContext context, TextEditingController ctrl, 
+    String label, Function fnCallback,
+    [bool required = false, String? label2]){
+
+    var today = DateTime.now();
+    return TextFormField(
+      controller: ctrl,
+      onTap: () async {
+        //_nowDate = value;
+        // Below line stops keyboard from appearing
+        FocusScope.of(context).requestFocus(FocusNode());
+        // Show Date Picker Here
+        //await _openDate(context);
+        final DateTime? date = await showDatePicker(
+          context: context,
+          initialDate: StrUt.isEmpty(ctrl.text) 
+            ? DateTime.now() : DateUt.strToDt(ctrl.text),
+          firstDate: today.add(const Duration(days: -365)), 
+          lastDate: today.add(const Duration(days: 365)),
+        );
+
+        if (date != null) {
+          ctrl.text = DateFormat(DateUt.dateCsFormat).format(date);
+        }
+
+        fnCallback();
+        //ctrl.text = DateFormat('yyyy/MM/dd').format(_nowDate);
+        //setState(() {});
+      },
+      style: WG.inputStyle(),
+      decoration: WG.inputLabel(label),
+    );
+  }
+
+  /*
+  static Future<void> _openDate(BuildContext context) async {
+    //final now = DateTime.now();
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: _nowDate,
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2101)
+    );
+    if (picked != null && picked != _nowDate) {
+      _nowDate = picked;
+    }
+  }
+  */
+
+  static Widget itime(BuildContext context, TextEditingController ctrl, 
+    String label, Function fnCallback,
+    [bool required = false, String? label2]){
+
+    var value = StrUt.isEmpty(ctrl.text) 
+      ? TimeOfDay.now() : DateUt.strToTime(ctrl.text);
+    return TextFormField(
+      controller: ctrl,
+      onTap: () async {
+        //TimeOfDay.now()
+        //_nowDate = value;
+        final time = await showTimePicker(
+          context: context, 
+          initialTime: value
+        );
+
+        if (time != null) {
+          ctrl.text = Xp.timeStr(time);
+        }
+
+        //callback
+        fnCallback();
+      },
+      style: WG.inputStyle(),
+      decoration: WG.inputLabel(label),
+    );
+  }
+
+  //區域欄位
+  static Widget areaField(String areaId, Function fnOnChange){
+    return DropdownButton<String>(
+      value: areaId,
+      icon: const Icon(Icons.arrow_downward),
+      elevation: 16,
+      style: const TextStyle(color: Colors.deepPurple),
+      underline: Container(
+        height: 2,
+        color: Colors.deepPurpleAccent,
+      ),
+      onChanged: (String? newValue) {
+        fnOnChange(newValue);
+        /*
+        setState(() {
+          _areaId = newValue!;
+        });
+        */
+      },
+      items: Xp.areas.map((IdStrDto row) {
+        return DropdownMenuItem<String>(
+          child: Text(row.str),
+          value: row.id,
+        );
+      }).toList(),
+    );
+  }
+
+  static Divider divider(){
+    return WidgetUt.divider(20);
+  }
+
+  static Widget icheck(String label, bool status, Function fnOnChange) {
+
+    //design color
+    Color getColor(Set<MaterialState> states) {
+      /*
+      const Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+
+      if (states.any(interactiveStates.contains)) {
+        return Colors.blue;
+      }
+      return Colors.red;
+      */
+      return Colors.grey;
+    }
+
+    return Row(
+      children: [        
+        Checkbox(
+          checkColor: Colors.white,
+          fillColor: MaterialStateProperty.resolveWith(getColor),
+          value: status,
+          onChanged: (bool? value) {
+            fnOnChange(value);
+            /*
+            (fnOnChange == null)
+              ? (){} 
+              : ()=> fnOnChange(value);
+              */
+          },
+        ),
+        WidgetUt.text(18, label),
+    ]);
+  }
+
+} //class

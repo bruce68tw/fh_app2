@@ -1,0 +1,9 @@
+.dart_tool/
+.idea/
+android/
+build/
+ios/
+web/
+windows/
+.flutter-*
+.packages
