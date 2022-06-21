@@ -139,7 +139,7 @@ return Stack(
                         await copyPhotoAsync(_tempPhoto);
                         ToolUt.closeForm(context);
                       }),
-                      WG.gap2(),
+                      WG2.hGap(),
                       WG.elevBtn('重新拍照', () async {
                         ToolUt.closeForm(context);
                         //openCameraDlg();

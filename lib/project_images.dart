@@ -336,11 +336,11 @@ class _ProjectImagesState extends State<ProjectImages> {
                             var file = await cameraCtrl!.takePicture();
                             await onTakePhotoAsync(context2, file);
                           }),
-                          WG.gap2(),
+                          WG2.hGap(),
                           WG.elevBtn('從相簿選擇', () async {
                             await onPickPhotoAsync(context2);
                           }),
-                          WG.gap2(),
+                          WG2.hGap(),
                           SizedBox(
                             width: 80,
                             child: iselect2(_flashType, _flashIcon[_flashType]!, _flashTypeList, (value){
@@ -357,7 +357,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                             await onRecordVideoAsync(context2);
                             setState(()=> _videoStatus = _videoRecording);  //only inline workable
                           }),
-                          WG.gap2(),
+                          WG2.hGap(),
 
                           //has video
                           (_videoFlags[_nowVideoNo])
@@ -370,7 +370,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                                       ToolUt.closeForm(context2);
                                       playVideo(true, getNowVideoPath());
                                   });}),
-                                  WG.gap2(),
+                                  WG2.hGap(),
                               ])
                             : Container(),
 
@@ -398,7 +398,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                               WG.elevBtn('確定上傳影片', () async {
                                 await copyVideoAsync(_tempVideo, context2);
                               }),
-                              WG.gap2(),
+                              WG2.hGap(),
                               WG.elevBtn('重新錄影', () async {
                                 ToolUt.closeForm(context2);
                                 openCameraDlg();
@@ -411,7 +411,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                               WG.elevBtn('從相簿選擇', () async {
                                 await onPickVideoAsync(context2);
                               }),
-                              WG.gap2(),
+                              WG2.hGap(),
                               WG.elevBtn('播放', () async {
                                 setState((){
                                   ToolUt.closeForm(context2);
@@ -460,7 +460,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                       WG.elevBtn('確定上傳影片', () async {
                         await copyVideoAsync(filePath, context2);
                       }),
-                      WG.gap2(),
+                      WG2.hGap(),
                       WG.elevBtn('重新錄影', () async {
                         ToolUt.closeForm(context2);
                         openCameraDlg();
@@ -472,7 +472,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                       WG.elevBtn('從相簿選擇', () async {
                         await onPickVideoAsync(context2);
                       }),
-                      WG.gap2(),
+                      WG2.hGap(),
                       WG.elevBtn('重新播放', () async {
                         //videoCtrl!.play();
                         playVideo(false, filePath);
@@ -530,7 +530,7 @@ class _ProjectImagesState extends State<ProjectImages> {
                         await repaintToImageAsync();
                         ToolUt.closeForm(context2);
                       }),
-                      WG.gap2(),
+                      WG2.hGap(),
                       WG.elevBtn('重新拍照', () async {
                         ToolUt.closeForm(context2);
                         openCameraDlg();

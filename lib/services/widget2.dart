@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
-
 import 'xp.dart';
 
 /// project widget(static)
@@ -45,37 +44,18 @@ class WG2 {
     );
   }
 
-  /*
-  //區域欄位
-  static Widget areaField(String areaId, Function fnOnChange){
-    return DropdownButton<String>(
-      value: areaId,
-      icon: const Icon(Icons.arrow_downward),
-      elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Colors.deepPurpleAccent,
-      ),
-      onChanged: (String? newValue) {
-        fnOnChange(newValue);
-      },
-      items: Xp.areas.map((IdStrDto row) {
-        return DropdownMenuItem<String>(
-          child: Text(row.str),
-          value: row.id,
-        );
-      }).toList(),
-    );
-  }
-  */
-
   //new
   //統計表格資料列文字
   static Text rowLabel(String label){
     return WG.getText(label);
   }
 
+  /// center ElevatedButton
+  static Widget centerElevBtn(String text, [VoidCallback? fnOnClick]) {
+    return Center(child: WG.elevBtn(text, fnOnClick));
+  }
+
+  /*
   static Widget tailCenter(Widget widget) {
     return Container(
       alignment: Alignment.center,
@@ -83,6 +63,7 @@ class WG2 {
       child: widget,
     );
   }
+  */
 
   ///return empty message
   static Widget emptyMsg(){

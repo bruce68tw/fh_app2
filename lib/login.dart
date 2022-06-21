@@ -112,7 +112,7 @@ class _LoginState extends State<Login> {
                   WG.iradio(['空氣',0,'能源',1,'專案',3], _actType, (value){
                     setState(()=> _actType = value);
                   }, isCenter: true),
-                  WG2.tailCenter(WG.elevBtn('登入', ()=> onLoginAsync())),
+                  WG2.centerElevBtn('登入', ()=> onLoginAsync()),
                   const Align(
                     alignment: Alignment.bottomCenter,
                     child: Text('版本:' + Xp.version,

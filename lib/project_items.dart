@@ -330,10 +330,10 @@ where id in ($list)
 
     //add tail button if need
     if (actEnum == WoActEnum.unAssign || actEnum == WoActEnum.assigned) {
-      widgets.add(WG2.tailCenter(WG.elevBtn('領取作業', onPicksAsync)));
+      widgets.add(WG2.centerElevBtn('領取作業', onPicksAsync));
     } else if(actEnum == WoActEnum.picked) {
       //已領取
-      widgets.add(WG2.tailCenter(WG.elevBtn('資料取消', ()=> onCancelsAsync(true))));
+      widgets.add(WG2.centerElevBtn('資料取消', ()=> onCancelsAsync(true)));
     } else if(actEnum == WoActEnum.unUpload) {
       //未上傳
       widgets.add(Row(
