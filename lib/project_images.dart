@@ -210,6 +210,7 @@ class _ProjectImagesState extends State<ProjectImages> {
   }
 
   //get current image path
+  //image format fixed to .png
   String getNowPhotoPath(){
     return Xp.dirWoImage(_nowPhotoDir, true) + 'image$_nowPhtotNo.png';
   }

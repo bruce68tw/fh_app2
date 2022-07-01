@@ -31,25 +31,25 @@ class ConfigTab {
     this.login_radio = 0
   });
 
-  static Map<String, Object> toMap(ConfigTab row) {
+  Map<String, Object> toJson() {
     return {
-      'id': row.id, 
-      'show_name': row.show_name,
-      'show_work_time': row.show_work_time,
-      'show_latitude': row.show_latitude,
-      'show_longitude': row.show_longitude,
-      'show_address': row.show_address,
-      'show_location': row.show_location,
-      'show_other1': row.show_other1,
-      'show_other2': row.show_other2,
-      'show_other3': row.show_other3,
-      'account': row.account,
-      'login_radio': row.login_radio,
+      'id': id, 
+      'show_name': show_name,
+      'show_work_time': show_work_time,
+      'show_latitude': show_latitude,
+      'show_longitude': show_longitude,
+      'show_address': show_address,
+      'show_location': show_location,
+      'show_other1': show_other1,
+      'show_other2': show_other2,
+      'show_other3': show_other3,
+      'account': account,
+      'login_radio': login_radio,
     };
   }
 
   ///convert json to model, static for be parameter !!
-  static ConfigTab fromMap(Map<String, dynamic> json){
+  static ConfigTab fromJson(Map<String, dynamic> json){
     return ConfigTab(
       id: json['id'], 
       show_name: json['show_name'] ?? 0,
@@ -66,26 +66,26 @@ class ConfigTab {
     );    
   }
   
-  static Future<Map<String, dynamic>?> getMapAsync() async {
+  static Future<Map<String, dynamic>?> getJsonAsync() async {
     return await DbUt.getMapAsync("select * from config where id='1'");
   }
 
   static Future<ConfigTab?> getAsync() async {
-    var map = await getMapAsync();
+    var map = await getJsonAsync();
     return (map == null)
       ? null
-      : fromMap(map);
+      : fromJson(map);
   }
 
   static Future<bool> insertAsync(ConfigTab row) async {
     if (StrUt.isEmpty(row.id)){
       row.id = '1';
     }
-    return await DbUt.insertAsync('config', ConfigTab.toMap(row));
+    return await DbUt.insertAsync('config', row.toJson());
   }
 
   static Future<bool> updateAsync(ConfigTab row) async {
-    return await DbUt.updateAsync('config', ConfigTab.toMap(row), 'id=?', ['1']);
+    return await DbUt.updateAsync('config', row.toJson(), 'id=?', ['1']);
   }
 
 }//class

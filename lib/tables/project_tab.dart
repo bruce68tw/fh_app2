@@ -48,56 +48,57 @@ class ProjectTab {
   });
 
   /// entity to map
-  static Map<String, Object> toMap(ProjectTab row) {
+  /// 必須使用 toJson 這個名稱, 否則執行 jsonEncode() 時會出現 JsonUnsupportedObjectError !!
+  Map<String, Object> toJson() {
     return {
-      'id': row.id, 
-      'name': row.name,
-      'work_order_no': row.work_order_no ?? '',
-      'save_flag': row.save_flag,
-      'area_id': row.area_id ?? '',
-      'work_class_id': row.work_class_id,
-      'work_dispatch_id': row.work_dispatch_id ?? '',
-      'close_reason_id': row.close_reason_id ?? '',
-      'close_reason_detail_id': row.close_reason_detail_id ?? '',
-      'latitude': row.latitude ?? '',
-      'longitude': row.longitude ?? '',
-      'work_time': row.work_time ?? '',
-      'address': row.address ?? '',
-      'location': row.location ?? '',
-      'signal': row.signal ?? '',
-      'note': row.note ?? '',
-      'other1': row.other1 ?? '',
-      'other2': row.other2 ?? '',
-      'other3': row.other3 ?? ''
+      'id': id, 
+      'name': name,
+      'work_order_no': work_order_no ?? '',
+      'save_flag': save_flag,
+      'area_id': area_id ?? '',
+      'work_class_id': work_class_id,
+      'work_dispatch_id': work_dispatch_id ?? '',
+      'close_reason_id': close_reason_id ?? '',
+      'close_reason_detail_id': close_reason_detail_id ?? '',
+      'latitude': latitude ?? '',
+      'longitude': longitude ?? '',
+      'work_time': work_time ?? '',
+      'address': address ?? '',
+      'location': location ?? '',
+      'signal': signal ?? '',
+      'note': note ?? '',
+      'other1': other1 ?? '',
+      'other2': other2 ?? '',
+      'other3': other3 ?? ''
     };
   }
 
-  static Map<String, Object> toServerMap(ProjectTab row) {
+  Map<String, Object> toServerJson() {
     return {
-      'Id': row.id, 
-      'Name': row.name,
-      'WorkOrderNo': row.work_order_no ?? '',
-      //'save_flag': row.save_flag,
-      'AreaId': row.area_id ?? '',
-      'WorkClassId': row.work_class_id,
-      'WorkDispatchId': row.work_dispatch_id ?? '',
-      'CloseReasonId': row.close_reason_id ?? '',
-      'CloseReasonDetailId': row.close_reason_detail_id ?? '',
-      'Latitude': row.latitude ?? '',
-      'Longitude': row.longitude ?? '',
-      'WorkTime': row.work_time ?? '',
-      'Address': row.address ?? '',
-      'Location': row.location ?? '',
-      'Signal': row.signal ?? '',
-      'Note': row.note ?? '',
-      'Other1': row.other1 ?? '',
-      'Other2': row.other2 ?? '',
-      'Other3': row.other3 ?? ''
+      'Id': id, 
+      'Name': name,
+      'WorkOrderNo': work_order_no ?? '',
+      //'save_flag': save_flag,
+      'AreaId': area_id ?? '',
+      'WorkClassId': work_class_id,
+      'WorkDispatchId': work_dispatch_id ?? '',
+      'CloseReasonId': close_reason_id ?? '',
+      'CloseReasonDetailId': close_reason_detail_id ?? '',
+      'Latitude': latitude ?? '',
+      'Longitude': longitude ?? '',
+      'WorkTime': work_time ?? '',
+      'Address': address ?? '',
+      'Location': location ?? '',
+      'Signal': signal ?? '',
+      'Note': note ?? '',
+      'Other1': other1 ?? '',
+      'Other2': other2 ?? '',
+      'Other3': other3 ?? ''
     };
   }
 
   ///convert json to model, static for be parameter !!
-  static ProjectTab fromMap(Map<String, dynamic> json){
+  static ProjectTab fromJson(Map<String, dynamic> json){
     return ProjectTab(
       id: json['id'], 
       name: json['name'],
@@ -122,7 +123,7 @@ class ProjectTab {
   }
 
   ///convert json to model, static for be parameter !!
-  static ProjectTab fromServerMap(Map<String, dynamic> json){
+  static ProjectTab fromServerJson(Map<String, dynamic> json){
     return ProjectTab(
       id: json['Id'], 
       name: json['Name'] ?? '',
@@ -146,17 +147,17 @@ class ProjectTab {
     );    
   }
 
-  static Future<Map<String, dynamic>?> getMapAsync(String id) async {
+  static Future<Map<String, dynamic>?> getJsonAsync(String id) async {
     return await DbUt.getMapAsync("select * from project where id='$id'");
   }
 
   static Future<bool> insertAsync(ProjectTab row) async {
     if (row.id == '') row.id = StrUt.uuid();
-    return await DbUt.insertAsync('project', ProjectTab.toMap(row));
+    return await DbUt.insertAsync('project', row.toJson());
   }
 
   static Future<bool> updateAsync(ProjectTab row) async {
-    return await DbUt.updateAsync('project', ProjectTab.toMap(row), 'id=?', [row.id]);
+    return await DbUt.updateAsync('project', row.toJson(), 'id=?', [row.id]);
   }
 
   static Future<int> deleteAsync(String id) async {

@@ -183,7 +183,7 @@ select * from project
 where id in ($list)
 ''';
     var jsons = await DbUt.getMapsAsync(sql);
-    var rows = jsons.map((a) => ProjectTab.fromMap(a)).cast<ProjectTab>().toList(); //has cast<>
+    var rows = jsons.map((a) => ProjectTab.fromJson(a)).cast<ProjectTab>().toList(); //has cast<>
     await Xp.sendAuditRowsAsync(context, rows, (){
       //回上個畫面
       ToolUt.closeForm(context, '資料上傳完成');

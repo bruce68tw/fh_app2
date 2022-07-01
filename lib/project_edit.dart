@@ -78,7 +78,7 @@ class _ProjectEditState extends State<ProjectEdit> {
 
   Future showAsync() async {
     //get config table row
-    var config = await ConfigTab.getMapAsync();
+    var config = await ConfigTab.getJsonAsync();
     _configTab = (config == null)
       ? ConfigTab(id: '', 
         show_name: 1, 
@@ -86,7 +86,7 @@ class _ProjectEditState extends State<ProjectEdit> {
         show_work_time: 1, 
         show_latitude: 1, 
         show_longitude: 1) 
-      : ConfigTab.fromMap(config);
+      : ConfigTab.fromJson(config);
 
     //get row if need
     if (_isNew){
@@ -116,17 +116,17 @@ class _ProjectEditState extends State<ProjectEdit> {
     } else {
       //先讀取本機, 如果不存在, 則讀取後端 DB 並寫入本機
       var id = widget.id;
-      var project = await ProjectTab.getMapAsync(id);
+      var project = await ProjectTab.getJsonAsync(id);
 
       //case of 讀取後端 DB 並寫入本機
       if (project == null){
         await HttpUt.getJsonAsync(context, 'api/Project/GetRow', false, {'id':id}, (result) async {
           var json = Xp.getResult(result);
-          _projectTab = ProjectTab.fromServerMap(json);
+          _projectTab = ProjectTab.fromServerJson(json);
           rowToForm();
         });
       } else {
-        _projectTab = ProjectTab.fromMap(project);
+        _projectTab = ProjectTab.fromJson(project);
         rowToForm();
       }
     }

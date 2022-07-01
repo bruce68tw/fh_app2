@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
@@ -13,16 +14,16 @@ class Xp {
 
   ///2.api server end point
   //home
-  //static const apiServer = '192.168.1.100:5007';
-  //static const apiServerTest = '192.168.1.100:5007';
+  static const apiServer = '192.168.1.103:5007';
+  static const apiServerTest = '192.168.1.103:5007';
 
   //efun wifi
   //static const apiServer = '192.168.50.164:5007';
   //static const apiServerTest = '192.168.50.164:5007';
 
   //富源網(new)
-  static const apiServer = 'uper.gtiot.net:5007';
-  static const apiServerTest = 'uper.gtiot.net:5007';
+  //static const apiServer = 'uper.gtiot.net:5007';
+  //static const apiServerTest = 'uper.gtiot.net:5007';
   //富源網(old)
   //static const apiServer = 'uper.fhnet.com.tw:5007';
   //static const apiServerTest = 'uper.fhnet.com.tw:5007';
@@ -116,12 +117,43 @@ class Xp {
     
     //check zip file
     var zipDir = Xp.dirWoImage(isNew ? dirNewImage : row.id);
-    var zipFile = FileUt.zipDir(zipDir);
-    if (zipFile == '') {
+    var zipFile = FunUt.dirTemp + FileUt.getDirName(zipDir) + '.zip';
+    var files = FileUt.zipDir(zipDir, zipFile);
+    var hasFile = (files != null);
+    /*
+    if (files == null) {
       await _sendAuditRow2Async(context, row, showWait, fnOk);
       return;
     } 
+    */
 
+    var data = {'row':jsonEncode(row.toServerJson())};
+    //var data = row;
+    //var data = {'row':'aa'};
+    await HttpUt.uploadZipAsync(context, 'api/Project/SendAuditZip', 
+        hasFile ? File(zipFile) : null, data, true, (result) async {
+      if (!checkResultError(context, result)) return;
+
+      //callback
+      if (fnOk != null) fnOk();
+    }, showWait);
+
+    /*
+    await _sendAuditRow2Async(context, row, showWait, (woNo) async {
+      //if (!checkResultError(context, result)) return;
+
+      //var data = {'id':row.id};
+      var data = {'id':row.id, 'woNo':woNo};
+      await HttpUt.uploadZipAsync(context, 'api/Project/SendAuditZip', File(zipFile), data, true, (result) async {
+        if (!checkResultError(context, result)) return;
+
+        //callback
+        if (fnOk != null) fnOk();
+      });
+    });
+    */
+
+    /*
     //send file first(by Yvonne)
     //upload zip file for both images & videos
     var data = {'id':row.id};
@@ -131,19 +163,23 @@ class Xp {
       //then send row
       await _sendAuditRow2Async(context, row, showWait, fnOk);
     });
+    */
   }
 
+  /*
+  //fnOk: fnOk(string woNo)
   static Future<void> _sendAuditRow2Async(BuildContext context, ProjectTab row, 
         bool showWait, [Function? fnOk]) async {
-      var data = ProjectTab.toServerMap(row);
+      var data = row.toServerJson();
       await HttpUt.getJsonAsync(context, 'api/Project/SendAudit', true, data, (result) async {
         if (!checkResultError(context, result)) return;
 
         //delete project row
         await ProjectTab.deleteAsync(row.id);
 
-        if (fnOk != null) fnOk();
+        if (fnOk != null) fnOk(getResult(result));
       }, null, showWait);
   }
+  */
 
 } //class
