@@ -14,16 +14,16 @@ class Xp {
 
   ///2.api server end point
   //home
-  static const apiServer = '192.168.1.103:5007';
-  static const apiServerTest = '192.168.1.103:5007';
+  //static const apiServer = '192.168.1.103:5007';
+  //static const apiServerTest = '192.168.1.103:5007';
 
   //efun wifi
   //static const apiServer = '192.168.50.164:5007';
   //static const apiServerTest = '192.168.50.164:5007';
 
   //富源網(new)
-  //static const apiServer = 'uper.gtiot.net:5007';
-  //static const apiServerTest = 'uper.gtiot.net:5007';
+  static const apiServer = 'uper.gtiot.net:5007';
+  static const apiServerTest = 'uper.gtiot.net:5007';
   //富源網(old)
   //static const apiServer = 'uper.fhnet.com.tw:5007';
   //static const apiServerTest = 'uper.fhnet.com.tw:5007';
