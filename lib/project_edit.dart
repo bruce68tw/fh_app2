@@ -5,11 +5,12 @@ import 'project_images.dart';
 
 class ProjectEdit extends StatefulWidget {
   const ProjectEdit({Key? key, required this.id, required this.areaId,
-    required this.wcId, required this.isEdit}) : super(key: key);
-  final String id;      //''(新增),有值表示 已領取/待審核
-  final String areaId;  //for 設定預設值 if need
-  final String wcId;    //input WorkClass.Id
-  final bool isEdit;    //true(已領取), false(待審核)
+    required this.wcId, required this.isEdit, required this.fromServer}) : super(key: key);
+  final String id;        //''(新增),有值表示 已領取/待審核
+  final String areaId;    //for 設定預設值 if need
+  final String wcId;      //input WorkClass.Id
+  final bool isEdit;      //true(已領取), false(待審核)
+  final bool fromServer;  //true(from server), false(from locale)
 
   @override
   _ProjectEditState createState() => _ProjectEditState();
@@ -54,13 +55,7 @@ class _ProjectEditState extends State<ProjectEdit> {
     //initial variables
     _isNew = (widget.id == '');
     _isEdit = (!_isNew && widget.isEdit);
-
-    //_wcId = Xp.workClasses.first.id;
     _wcId = widget.wcId;
-    //_areaId = widget.areaId;
-    //_dispatchId = Xp.dispatches.first.id;
-    //_closeId = Xp.closes.first.id;
-    //setCloseDetails(_closeId);
 
     super.initState();
     Future.delayed(Duration.zero, ()=> showAsync());
@@ -83,18 +78,20 @@ class _ProjectEditState extends State<ProjectEdit> {
       ? ConfigTab(id: '', 
         show_name: 1, 
         show_location: 1, 
-        show_work_time: 1, 
+        show_work_date: 1, 
         show_latitude: 1, 
         show_longitude: 1) 
       : ConfigTab.fromJson(config);
 
     //get row if need
+    var woId = widget.id;
     if (_isNew){
       _projectTab = ProjectTab(
         id: '', 
         name: '',
         save_flag: 1,
         work_class_id: _wcId,
+        work_date: DateUt.now2(),
 
         /*
         //temp add below
@@ -109,26 +106,32 @@ class _ProjectEditState extends State<ProjectEdit> {
         other2: '其他2',
         other3: '其他',
         */
-        work_time: DateUt.now2(),
       );
 
       rowToForm();
-    } else {
+    } else if (widget.fromServer){
       //先讀取本機, 如果不存在, 則讀取後端 DB 並寫入本機
-      var id = widget.id;
-      var project = await ProjectTab.getJsonAsync(id);
+      //var id = widget.id;
+      //var project = await ProjectTab.getJsonAsync(id);
 
       //case of 讀取後端 DB 並寫入本機
-      if (project == null){
-        await HttpUt.getJsonAsync(context, 'api/Project/GetRow', false, {'id':id}, (result) async {
+      //if (project == null){
+        await HttpUt.getJsonAsync(context, 'api/Project/GetFullRow', false, {'id':woId}, (result) async {
           var json = Xp.getResult(result);
           _projectTab = ProjectTab.fromServerJson(json);
           rowToForm();
         });
+      /*
       } else {
         _projectTab = ProjectTab.fromJson(project);
         rowToForm();
       }
+      */
+    } else {
+      //from locale
+      var project = await ProjectTab.getJsonAsync(woId);
+        _projectTab = ProjectTab.fromJson(project!);
+        rowToForm();
     }
   }
 
@@ -147,13 +150,13 @@ class _ProjectEditState extends State<ProjectEdit> {
     other3Ctrl.text = _projectTab.other3 ?? '';
 
     //get date, time
-    if (StrUt.isEmpty(_projectTab.work_time)){
+    if (StrUt.isEmpty(_projectTab.work_date)){
       workDateCtrl.text = '';
       workTimeCtrl.text = '';
     } else {
-      var nowCols = _projectTab.work_time!.split(' ');
+      var nowCols = _projectTab.work_date!.split(' ');
       workDateCtrl.text = nowCols[0];
-      workTimeCtrl.text = nowCols[1];
+      workTimeCtrl.text = nowCols[1].substring(0,5);
     }
 
     //variables
@@ -188,7 +191,7 @@ class _ProjectEditState extends State<ProjectEdit> {
       save_flag: 1,
       work_dispatch_id: _dispatchId,
       work_class_id: _wcId,
-      work_time: workDateCtrl.text + ' ' + workTimeCtrl.text,
+      work_date: workDateCtrl.text + ' ' + workTimeCtrl.text,
       area_id: _areaId,
       latitude: latitudeCtrl.text,
       longitude: longitudeCtrl.text,
@@ -241,8 +244,8 @@ class _ProjectEditState extends State<ProjectEdit> {
                         }),
                       ]),
                       TableRow(children: [
-                        WG.icheck('作業時間', IntUt.toBool(_configTab.show_work_time), (value){                  
-                          setState((){_configTab.show_work_time = value ? 1 : 0;});
+                        WG.icheck('作業時間', IntUt.toBool(_configTab.show_work_date), (value){                  
+                          setState((){_configTab.show_work_date = value ? 1 : 0;});
                         }),
                         WG.icheck('其他1', IntUt.toBool(_configTab.show_other1), (value){                  
                           setState((){_configTab.show_other1 = value ? 1 : 0;});

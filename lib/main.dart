@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
+//import 'package:image/image.dart';
 import 'all_com.dart';
 import 'login.dart';
 
@@ -14,14 +15,27 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const bgColor = Color(0xFFA7D55B);
+
     return MaterialApp(
       home: const MainForm(),
       theme: ThemeData(
+        //scaffoldBackgroundColor: const Color(0xFFA7D55B),
+        //primaryColor: titleBgColor,
+        //primarySwatch: MaterialColor(0xFFA7D55B, null),
+        appBarTheme: const AppBarTheme(
+          //backgroundColor: Colors.green, //Color(0xFFA7D55B),
+          backgroundColor: bgColor,
+        ),
         textTheme: const TextTheme(
           button: TextStyle(fontSize:Xp.fontSize),
         ),
-      ),      
-    );
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            primary: bgColor
+            //onPrimary: Colors.black, // foreground (text) color
+        )),
+    ));
   }
 } //MainApp
 
@@ -88,6 +102,7 @@ class _MainFormState extends State<MainForm> {
         ),
         body: const TabBarView(children: <Widget>[
             Login(),
+            //Sqlite(),
             Text('TabsView 2'),
             Text('TabsView 3'),
     ])));

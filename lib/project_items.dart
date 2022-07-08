@@ -19,7 +19,7 @@ class ProjectItems extends StatefulWidget {
 class _ProjectItemsState extends State<ProjectItems> {  
   bool _isOk = false;       //state variables
   late String _areaId = widget.areaId;  //empty means all
-  List<ProjectItemDto> _rows = [];      //list rows
+  List<ProjectItemDto> _rows = [];      //list rows from server
   int _checkeds = 0;   //checked count
   final addressCtrl = TextEditingController();
 
@@ -149,8 +149,9 @@ and save_flag=${widget.actEnum == WoActEnum.unUpload ? 1 : 0}
   }
 
   //onclick (edit/view row)
-  onEditAsync(String id, String wcId, bool isEdit) async {
-    var msg = await ToolUt.openFormAsync(context, ProjectEdit(id: id, areaId: _areaId, wcId: wcId, isEdit: isEdit)) ?? '';
+  onEditAsync(String id, String wcId, bool isEdit, bool fromServer) async {
+    var msg = await ToolUt.openFormAsync(context, 
+      ProjectEdit(id: id, areaId: _areaId, wcId: wcId, isEdit: isEdit, fromServer: fromServer)) ?? '';
     if (msg != ''){
       ToolUt.msg(context, msg);
       await showAsync();
@@ -226,7 +227,8 @@ where id in ($list)
   /// @rows source rows
   /// @act C(checkbox),E(編輯),V(檢視)
   /// @return list widget
-  void widgetsAddRows(List<Widget> widgets, List<ProjectItemDto> rows, bool showCheck, String? editFun) {
+  void widgetsAddRows(List<Widget> widgets, List<ProjectItemDto> rows, 
+    bool showCheck, String? editFun, bool fromServer) {
     //if (rows.isEmpty) return WG2.emptyMsg();
 
     var address = addressCtrl.text;
@@ -239,7 +241,7 @@ where id in ($list)
       }
 
       //add checkbox or text
-      var statusName = '處理中';
+      var statusName = Xp.getWoStatusName(row.status);
       widgets.add(
         showCheck 
           ? SizedBox(
@@ -254,7 +256,7 @@ where id in ($list)
       widgets.add(InkWell(
         onTap: (editFun == null)
           ? null
-          : ()=> onEditAsync(row.id, row.workClassId, (editFun == 'E')),
+          : ()=> onEditAsync(row.id, row.workClassId, (editFun == 'E'), fromServer),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -273,6 +275,7 @@ where id in ($list)
 
     var title = '';
     var showCheck = true;   //show checkbox
+    var fromServer = true;  //read rows from server
     String? editFun;        //null,E(edit),V(view) 
     var actEnum = widget.actEnum;
     switch(actEnum){
@@ -285,10 +288,12 @@ where id in ($list)
       case WoActEnum.picked:
         title = '已領取'; 
         //showCheck = false;
+        fromServer = false;
         editFun = 'E';  //edit
         break;
       case WoActEnum.unUpload:
         title = '未上傳'; 
+        fromServer = false;
         editFun = 'E';  //edit
         break;
       case WoActEnum.auditing:       
@@ -326,7 +331,7 @@ where id in ($list)
 
     //add rows
     widgets.add(WG2.vGap());
-    widgetsAddRows(widgets, _rows, showCheck, editFun);
+    widgetsAddRows(widgets, _rows, showCheck, editFun, fromServer);
 
     //add tail button if need
     if (actEnum == WoActEnum.unAssign || actEnum == WoActEnum.assigned) {

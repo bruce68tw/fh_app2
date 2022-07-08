@@ -5,7 +5,7 @@ import 'package:base_lib/all.dart';
 class ConfigTab {
   String id; 
   int show_name;
-  int show_work_time;
+  int show_work_date;
   int show_latitude;
   int show_longitude;
   int show_address;
@@ -19,7 +19,7 @@ class ConfigTab {
   ConfigTab({
     this.id = '1', 
     this.show_name = 0,
-    this.show_work_time = 0,
+    this.show_work_date = 0,
     this.show_latitude = 0,
     this.show_longitude = 0,
     this.show_address = 0,
@@ -35,7 +35,7 @@ class ConfigTab {
     return {
       'id': id, 
       'show_name': show_name,
-      'show_work_time': show_work_time,
+      'show_work_date': show_work_date,
       'show_latitude': show_latitude,
       'show_longitude': show_longitude,
       'show_address': show_address,
@@ -53,7 +53,7 @@ class ConfigTab {
     return ConfigTab(
       id: json['id'], 
       show_name: json['show_name'] ?? 0,
-      show_work_time: json['show_work_time'] ?? 0,
+      show_work_date: json['show_work_date'] ?? 0,
       show_latitude: json['show_latitude'] ?? 0,
       show_longitude: json['show_longitude'] ?? 0,
       show_address: json['show_address'] ?? 0,

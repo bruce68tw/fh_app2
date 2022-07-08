@@ -72,8 +72,8 @@ class _ProjectPhotoState extends State<ProjectPhoto> {
     if (config.show_name == 1 && StrUt.notEmpty(project.name)){
       result.add(Text(project.name, style: const TextStyle(fontSize:fontSize, color:color)));
     }
-    if (config.show_work_time == 1 && StrUt.notEmpty(project.work_time)){
-      result.add(Text(project.work_time!, style: const TextStyle(fontSize:fontSize, color:color)));
+    if (config.show_work_date == 1 && StrUt.notEmpty(project.work_date)){
+      result.add(Text(project.work_date!, style: const TextStyle(fontSize:fontSize, color:color)));
     }
     if (config.show_location == 1 && StrUt.notEmpty(project.location)){
       result.add(Text(project.location!, style: const TextStyle(fontSize:fontSize, color:color)));

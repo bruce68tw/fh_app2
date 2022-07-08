@@ -18,10 +18,12 @@ class ProjectImages extends StatefulWidget {
   _ProjectImagesState createState() => _ProjectImagesState();
 }
 
-class _ProjectImagesState extends State<ProjectImages> {  
+class _ProjectImagesState extends State<ProjectImages> { 
+  //上傳圖檔固定轉成png
   final _repaintKey = GlobalKey();
   bool _isOk = false;       //state variables
-  late bool _isNew;         //new or edit
+  late bool _isNew;         //true(new) or false(edit)
+  late bool _isEdit;        //widget.isEdit, true(can edit) or false(readonly)
   bool _isVideo = false;    //true(image), false(video)
   late String _nowPhotoDir; //'new' or [uuid]
   final Image _noPhotoImage = Image.asset('images/noImage.png');
@@ -65,29 +67,30 @@ class _ProjectImagesState extends State<ProjectImages> {
   void initState() {
     //initial variables
     _isNew = (widget.project.id == '');
+    _isEdit = widget.isEdit;
     _nowPhotoDir = _isNew ? Xp.dirNewImage : widget.project.id;
     _hasVideoImage = Image.asset(_hasVideoImagePath);
 
     //videoCtrl!.initialize();
 
     //reset
-    _photoImages.clear();
-    _photoFlags.clear();
-    _videoImages.clear();
-    _videoFlags.clear();
+    //_photoImages.clear();
+    //_photoFlags.clear();
+    //_videoImages.clear();
+    //_videoFlags.clear();
+    for (var i=0; i<_photoLen; i++){
+      _photoImages.add(_noPhotoImage);
+      _photoFlags.add(false);
+      _videoImages.add(_noVideoImage);
+      _videoFlags.add(false);
+    }
 
     //load photo/video image
     if (_isNew){
       //delete folder files if need
       FileUt.deleteDirFiles(Xp.dirWoImage(Xp.dirNewImage));
-
-      for (var i=0; i<_photoLen; i++){
-        _photoImages.add(_noPhotoImage);
-        _photoFlags.add(false);
-        _videoImages.add(_noVideoImage);
-        _videoFlags.add(false);
-      }
-    } else {
+    } else if(_isEdit) {
+      //get image from locale
       var dirWo = Xp.dirWoImage(widget.project.id);
       for (var i=0; i<_photoLen; i++){
         //for photo
@@ -95,21 +98,28 @@ class _ProjectImagesState extends State<ProjectImages> {
         var image = FileUt.exist(path)
           ? Image.file(File(path)) 
           : _noPhotoImage;
-        _photoImages.add(image);
-        _photoFlags.add(false);
+        _photoImages[i] = image;
+        //_photoFlags[i] = false;
 
         //for video
         path = '${dirWo}video$i.mp4';
+        /*
         image = FileUt.exist(path)
           ? _hasVideoImage 
           : _noVideoImage;
         _videoImages.add(image);
-        _videoFlags.add(false);
+        */
+        setVideoImage(i, FileUt.exist(path));
+        //_videoFlags.add(false);
       }
     }
 
     super.initState();
     Future.delayed(Duration.zero, ()=> showAsync());
+  }
+
+  void setVideoImage(int index, bool hasVideo){
+    _videoImages[index] = hasVideo ? _hasVideoImage : _noVideoImage;
   }
 
   @override
@@ -122,11 +132,46 @@ class _ProjectImagesState extends State<ProjectImages> {
 
   Future showAsync() async {
     //initial camera if need
-    if (widget.isEdit) {
+    if (_isEdit) {
         await initCamera();
     } else {
+        if (!_isEdit) await showWebMediaAsync(widget.project.id);
+
         setState(()=> _isOk = true);
     }
+  }
+
+  /// show web photo & vidoe
+  Future showWebMediaAsync(String woId) async {
+    //photo
+    ToolUt.openWait(context);
+
+    for(var i=0; i<_photoLen; i++){
+      var data = { 'woId': woId, 'index': i.toString() };
+      var image = await HttpUt.getImageAsync(context, 'api/Project/WoImage', data, false);
+      if (image != null){
+        _photoImages[i] = image;
+      }
+    }
+
+    //video
+    await HttpUt.getJsonAsync(context, 'api/Project/WoVideos', false, { 'woId':woId }, (result){
+      String data = Xp.getResult(result);
+      if (data == '' || !Xp.checkResultError(context, result)){
+        ToolUt.closeWait(context);
+        return;
+      } 
+
+      var sortList = data.split(',');
+      for(var i=0; i<sortList.length; i++){
+        var index = int.parse(sortList[i]) - 1;
+        setVideoImage(index, true);
+      }
+
+      ToolUt.closeWait(context);
+    }, null, false);
+
+    //ToolUt.closeWait(context);
   }
 
   Future initCamera() async {
@@ -149,7 +194,7 @@ class _ProjectImagesState extends State<ProjectImages> {
     return Material(
       child: InkWell(
         child: _photoImages[index],
-        onTap: widget.isEdit 
+        onTap: _isEdit 
           ? (){
             _isVideo = false;
             _nowPhtotNo = index;
@@ -164,7 +209,7 @@ class _ProjectImagesState extends State<ProjectImages> {
     return Material(
       child: InkWell(
         child: _videoImages[index],
-        onTap: widget.isEdit 
+        onTap: _isEdit 
           ? (){
             _isVideo = true;
             _nowVideoNo = index;
@@ -209,14 +254,16 @@ class _ProjectImagesState extends State<ProjectImages> {
     await copyVideoAsync(file.path, context2);
   }
 
-  //get current image path
+  //get current image path, 上傳壓縮時才改成正確檔名
   //image format fixed to .png
   String getNowPhotoPath(){
     return Xp.dirWoImage(_nowPhotoDir, true) + 'image$_nowPhtotNo.png';
+    //return Xp.dirWoImage(_nowPhotoDir, true) + StrUt.uuid() + '.png';
   }
 
   String getNowVideoPath(){
     return Xp.dirWoImage(_nowPhotoDir, true) + 'video$_nowVideoNo.mp4';
+    //return Xp.dirWoImage(_nowPhotoDir, true) + StrUt.uuid() + '.mp4';
   }
 
   /// copy image to wo image folder
@@ -558,8 +605,8 @@ class _ProjectImagesState extends State<ProjectImages> {
     if (config.show_name == 1 && StrUt.notEmpty(project.name)){
       result.add(Text(project.name, style: const TextStyle(fontSize:fontSize, color:color)));
     }
-    if (config.show_work_time == 1 && StrUt.notEmpty(project.work_time)){
-      result.add(Text(project.work_time!, style: const TextStyle(fontSize:fontSize, color:color)));
+    if (config.show_work_date == 1 && StrUt.notEmpty(project.work_date)){
+      result.add(Text(project.work_date!, style: const TextStyle(fontSize:fontSize, color:color)));
     }
     if (config.show_location == 1 && StrUt.notEmpty(project.location)){
       result.add(Text(project.location!, style: const TextStyle(fontSize:fontSize, color:color)));
@@ -668,7 +715,7 @@ class _ProjectImagesState extends State<ProjectImages> {
             TableRow(children: [WG.getLabel('其他3'), getPhotoImage(5), getVideoImage(5)]),
 
             //tail btns
-            widget.isEdit
+            _isEdit
               ? TableRow(children: [
                   const Text(''),
                   Padding(

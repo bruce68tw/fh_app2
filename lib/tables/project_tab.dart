@@ -13,10 +13,9 @@ class ProjectTab {
   String? work_dispatch_id;
   String? close_reason_id;
   String? close_reason_detail_id;
-  //DateTime workTime;
   String? latitude;
   String? longitude;
-  String? work_time;
+  String? work_date;
   String? address;
   String? location;
   String? signal;
@@ -37,7 +36,7 @@ class ProjectTab {
     this.close_reason_detail_id,
     this.latitude,
     this.longitude,
-    this.work_time,
+    this.work_date,
     this.address,
     this.location,
     this.signal,
@@ -62,7 +61,7 @@ class ProjectTab {
       'close_reason_detail_id': close_reason_detail_id ?? '',
       'latitude': latitude ?? '',
       'longitude': longitude ?? '',
-      'work_time': work_time ?? '',
+      'work_date': work_date ?? '',
       'address': address ?? '',
       'location': location ?? '',
       'signal': signal ?? '',
@@ -86,7 +85,7 @@ class ProjectTab {
       'CloseReasonDetailId': close_reason_detail_id ?? '',
       'Latitude': latitude ?? '',
       'Longitude': longitude ?? '',
-      'WorkTime': work_time ?? '',
+      'WorkDate': work_date ?? '',
       'Address': address ?? '',
       'Location': location ?? '',
       'Signal': signal ?? '',
@@ -111,7 +110,7 @@ class ProjectTab {
       close_reason_detail_id: json['close_reason_detail_id'] ?? '',
       latitude: json['latitude'].toString(),
       longitude: json['longitude'].toString(),
-      work_time: json['work_time'] ?? '',
+      work_date: json['work_date'] ?? '',
       address: json['address'] ?? '',
       location: json['location'] ?? '',
       signal: json['signal'] ?? '',
@@ -122,28 +121,31 @@ class ProjectTab {
     );    
   }
 
-  ///convert json to model, static for be parameter !!
+  /// convert json to model, static for be parameter !!
+  /// 後端傳回額外時間字串 WorkDate2
   static ProjectTab fromServerJson(Map<String, dynamic> json){
+    var a = json['a'];
     return ProjectTab(
-      id: json['Id'], 
-      name: json['Name'] ?? '',
-      work_order_no: json['WorkOrderNo'] ?? '',
+      id: a['Id'], 
+      name: a['Name'] ?? '',
+      work_order_no: a['WorkOrderNo'] ?? '',
       save_flag: 0,
-      area_id: json['AreaId'] ?? '',
-      work_class_id: json['WorkClassId'],
-      work_dispatch_id: json['WorkDispatchId'] ?? '',
-      close_reason_id: json['CloseReasonId'] ?? '',
-      close_reason_detail_id: json['CloseReasonDetailId'] ?? '',
-      latitude: json['Latitude'].toString(),
-      longitude: json['Longitude'].toString(),
-      work_time: json['WorkTime'] ?? '',
-      address: json['Address'] ?? '',
-      location: json['Location'] ?? '',
-      signal: json['Signal'] ?? '',
-      note: json['Note'] ?? '',
-      other1: json['Other1'] ?? '',
-      other2: json['Other2'] ?? '',
-      other3: json['Other3'] ?? ''
+      area_id: a['AreaId'] ?? '',
+      work_class_id: a['WorkClassId'],
+      work_dispatch_id: a['WorkDispatchId'] ?? '',
+      close_reason_id: a['CloseReasonId'] ?? '',
+      close_reason_detail_id: a['CloseReasonDetailId'] ?? '',
+      latitude: a['Latitude'].toString(),
+      longitude: a['Longitude'].toString(),
+      address: a['Address'] ?? '',
+      location: a['Location'] ?? '',
+      signal: a['Signal'] ?? '',
+      note: a['Note'] ?? '',
+      other1: a['Other1'] ?? '',
+      other2: a['Other2'] ?? '',
+      other3: a['Other3'] ?? '',
+      //
+      work_date: json['WorkDate2'] ?? '',
     );    
   }
 

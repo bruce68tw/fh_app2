@@ -1,3 +1,5 @@
+import 'package:fh_app2/all_com.dart';
+
 class ProjectItemDto {
   bool checked;
   String id;
@@ -5,6 +7,7 @@ class ProjectItemDto {
   String workClassId;
   String address;
   String workOrderNo;
+  int status;
 
   ProjectItemDto({
     required this.checked, 
@@ -12,7 +15,8 @@ class ProjectItemDto {
     required this.name,
     required this.workClassId, 
     required this.address, 
-    required this.workOrderNo
+    required this.workOrderNo,
+    required this.status,
     });
 
   ///convert json to model, static for be parameter !!
@@ -24,6 +28,7 @@ class ProjectItemDto {
       workClassId : json['WorkClassId'],
       address : json['Address'] ?? '',
       workOrderNo : json['WorkOrderNo'] ?? '',
+      status : json['WorkStatusId'] ?? WorkStatusEnum.unAssign,
     );    
   }
 

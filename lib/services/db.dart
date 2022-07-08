@@ -6,7 +6,7 @@ class Db {
   /// project.save_flag: 0(未儲存,表示已領取), 1(有儲存,表示未上傳)
   /// 領取時必須設定 save_flag=0
   static void init() {
-    DbUt.init('FH.db', 1, ['''
+    DbUt.init('FH.db', 2, ['''
 Create Table project(
   id Text Primary Key, 
   name Text,
@@ -19,7 +19,7 @@ Create Table project(
   close_reason_detail_id Text,
   latitude Real,
   longitude Real,
-  work_time Text,
+  work_date Text,
   address Text,
   location Text,
   signal Integer,
@@ -31,7 +31,7 @@ Create Table project(
 Create Table config(
   id Text Primary Key, 
   show_name Integer,
-  show_work_time Integer,
+  show_work_date Integer,
   show_latitude Integer,
   show_longitude Integer,
   show_address Integer,

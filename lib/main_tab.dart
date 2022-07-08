@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'fan.dart';
 import 'project.dart';
 import 'services/widget2.dart';
 
@@ -30,10 +31,11 @@ class _MainTabState extends State<MainTab> {
             ],
           ),
         ),
-        body: const TabBarView(children: <Widget>[
-            Text('TabsView 1'),
-            Text('TabsView 2'),
-            Text('TabsView 3'),
+        body: TabBarView(children: <Widget>[
+            const Text('空品'),
+            //const Text('FAN'),
+            Fan(),
+            const Text('DCU'),
             Project(),
         ]),
       ),
