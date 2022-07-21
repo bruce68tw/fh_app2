@@ -1,3 +1,4 @@
+import 'package:base_lib/all.dart';
 import 'package:flutter/material.dart';
 import 'models/project_dto.dart';
 import 'project0.dart';
@@ -5,10 +6,13 @@ import 'services/xp.dart';
 
 class Fan extends Project0 {  
   Fan({Key? key}) : super(key: key, dto:ProjectDto(
-    table: 'project',
+    table: 'fan',
+    tableTail: true,
+    ctrl: 'Fan',
     addBtn: false,
-    imageDirName: 'Project',
+    //imageDirName: 'Project',
     wcIds: [Xp.fanCheckWcId, Xp.fanFixWcId, Xp.fanMachWcId],
+    wcNames: ['會勘', '維修', '裝機'],
   ));
 
   @override
@@ -22,6 +26,7 @@ class _FanState extends Project0State<Fan> {
   Widget table(){
     //const label = '新增';
     //const label = '+';
+    var wcNames = widget.dto.wcNames;
     return Table(
       columnWidths: const {
         0: FlexColumnWidth(4),
@@ -33,9 +38,9 @@ class _FanState extends Project0State<Fan> {
       children: [
         TableRow(children: [
           const Text(''),
-          tableHeader('會勘'),
-          tableHeader('維修'),
-          tableHeader('裝機'),
+          tableHeader(wcNames[0]),
+          tableHeader(wcNames[1]),
+          tableHeader(wcNames[2]),
         ]),
         /*
         TableRow(children: [
@@ -56,5 +61,21 @@ class _FanState extends Project0State<Fan> {
     ]);
   }
 
+  /// 讀取 locale 的統計數字
+  @override
+  Future<List<Map<String, dynamic>>> getLocaleCountAsync(String areaId, int saveFlag) async {
+
+    //欄位名稱為 WorkClassId,Count(配合 setCount())
+    //union
+    var sql = '''
+select
+  work_class_id as WorkClassId,
+  count(*) as Count
+from fan_check 
+where ('$areaId'='' or area_id='$areaId')
+and save_flag=$saveFlag
+''';
+    return await DbUt.getJsonsAsync(sql);
+  }
 
 } //class

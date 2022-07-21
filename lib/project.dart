@@ -1,14 +1,18 @@
+import 'package:base_lib/all.dart';
 import 'package:flutter/material.dart';
 import 'models/project_dto.dart';
-import 'project0.dart';
 import 'services/xp.dart';
+import 'project0.dart';
 
 class Project extends Project0 {  
   Project({Key? key}) : super(key: key, dto:ProjectDto(
     table: 'project',
+    tableTail: false,
+    ctrl: 'Project',
     addBtn: true,
-    imageDirName: 'Project',
+    //imageDirName: 'Project',
     wcIds: [Xp.prjMeetWcId, Xp.prjMachWcId, Xp.prjFixWcId, Xp.prjCheckWcId],
+    wcNames: ['會勘', '裝機', '維修', '巡檢'],
   ));
 
   @override
@@ -23,6 +27,7 @@ class _ProjectState extends Project0State<Project> {
     //const label = 'New';
     //const label = '新增';
     const label = '+';
+    var wcNames = widget.dto.wcNames;
     return Table(
       columnWidths: const {
         0: FlexColumnWidth(4),
@@ -34,10 +39,10 @@ class _ProjectState extends Project0State<Project> {
       children: [
         TableRow(children: [
           const Text(''),
-          tableHeader('會勘'),
-          tableHeader('裝機'),
-          tableHeader('維修'),
-          tableHeader('巡檢'),
+          tableHeader(wcNames[0]),
+          tableHeader(wcNames[1]),
+          tableHeader(wcNames[2]),
+          tableHeader(wcNames[3]),
         ]),
         TableRow(children: [
           const Text(''),
@@ -54,6 +59,23 @@ class _ProjectState extends Project0State<Project> {
         tableRow('''當日完工
  待審核''', auditings, onAuditingAsync),
     ]);
+  }
+
+  /// 讀取 locale 的統計數字
+  @override
+  Future<List<Map<String, dynamic>>> getLocaleCountAsync(String areaId, int saveFlag) async {
+
+    //欄位名稱為 WorkClassId,Count(配合 setCount())
+    var sql = '''
+select
+  work_class_id as WorkClassId,
+  count(*) as Count
+from project 
+where ('$areaId'='' or area_id='$areaId')
+and save_flag=$saveFlag
+group by work_class_id
+''';
+    return await DbUt.getJsonsAsync(sql);
   }
 
 } //class

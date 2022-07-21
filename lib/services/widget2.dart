@@ -17,11 +17,16 @@ class WG2 {
   }
 
   static TextStyle titleLabelStyle() {
-    return const TextStyle(fontSize: Xp.titleFontSize);
+    return const TextStyle(
+      //color: Colors.black,  //not work
+      fontSize: Xp.titleFontSize,
+      );
   }
 
   //區域欄位
-  static Widget areaField(String label, String value, double? width, Function fnOnChange, [String? tail]){
+  static Widget areaField(String label, String value, double? width, 
+    Function fnOnChange, [String? tail]){
+
     List<Widget> list = [];
     if (label != ''){
       list.add(WG.getLabel('區域'));

@@ -150,7 +150,7 @@ class ProjectTab {
   }
 
   static Future<Map<String, dynamic>?> getJsonAsync(String id) async {
-    return await DbUt.getMapAsync("select * from project where id='$id'");
+    return await DbUt.getJsonAsync("select * from project where id='$id'");
   }
 
   static Future<bool> insertAsync(ProjectTab row) async {

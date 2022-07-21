@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
 import 'all_com.dart';
+//import 'models/project_dto.dart';
 import 'project_edit.dart';
 
 //點擊 未指派/已指派 數字時開啟本畫面
 class ProjectItems extends StatefulWidget {
-  const ProjectItems({Key? key, required this.areaId, 
+  const ProjectItems({Key? key, required this.dto, required this.areaId, 
     required this.wcId, required this.actEnum}) : super(key: key);
 
+  final ProjectDto dto;
   final String areaId;  //Area.Id
   final String wcId;    //WorkClass.Id
   final int actEnum;    //WoActEnum
@@ -17,14 +19,17 @@ class ProjectItems extends StatefulWidget {
 }
 
 class _ProjectItemsState extends State<ProjectItems> {  
+  late ProjectDto _dto;
   bool _isOk = false;       //state variables
   late String _areaId = widget.areaId;  //empty means all
-  List<ProjectItemDto> _rows = [];      //list rows from server
+  List<ProjectItemDto> _items = [];      //list rows from server
   int _checkeds = 0;   //checked count
   final addressCtrl = TextEditingController();
 
   @override
   void initState() {
+    _dto = widget.dto;
+
     super.initState();
     Future.delayed(Duration.zero, ()=> showAsync());
   }
@@ -32,12 +37,15 @@ class _ProjectItemsState extends State<ProjectItems> {
   Future showAsync() async {
     //read db
     var readServer = true;  //從後端db讀取資料, false:read locale
-    var act = '';
+    var act = '';   //server action
     switch(widget.actEnum){
+      //未指派
       case WoActEnum.unAssign:
         act = 'UnAssigns'; break;
+      //已指派
       case WoActEnum.assigned:
         act = 'Assigneds'; break;
+      //完工待審核
       case WoActEnum.auditing:
         act = 'Auditings'; break;
 
@@ -64,11 +72,11 @@ class _ProjectItemsState extends State<ProjectItems> {
         'areaId': _areaId, 
         'wsId': widget.wcId,
       };
-      await HttpUt.getJsonAsync(context, 'api/Project/$act', false, data, (result) async {
+      await HttpUt.getJsonAsync(context, 'api/${_dto.ctrl}/$act', false, data, (result) async {
         var json = Xp.getResult(result);
         if (json == null) return;
 
-        _rows = json.map((row) => ProjectItemDto.fromJson(row)).cast<ProjectItemDto>().toList(); //has cast<>
+        _items = json.map((row) => ProjectItemDto.fromJson(row)).cast<ProjectItemDto>().toList(); //has cast<>
         setState(()=> _isOk = true);  
       });
 
@@ -81,20 +89,20 @@ select
   work_class_id as WorkClassId,
   address as Address,
   work_order_no as WorkOrderNo
-from project 
+from ${_dto.table} 
 where ('$_areaId'='' or area_id='$_areaId')
 and work_class_id='${widget.wcId}'
 and save_flag=${widget.actEnum == WoActEnum.unUpload ? 1 : 0}
 ''';
-      var json = await DbUt.getMapsAsync(sql);
-      _rows = json.map((row) => ProjectItemDto.fromJson(row)).cast<ProjectItemDto>().toList(); //has cast<>
+      var json = await DbUt.getJsonsAsync(sql);
+      _items = json.map((row) => ProjectItemDto.fromJson(row)).cast<ProjectItemDto>().toList(); //has cast<>
       setState(()=> _isOk = true);  
     }    
   }
 
   //set checkeds count
   void setCheckeds() {
-    _checkeds = _rows.where((a)=> a.checked).length;
+    _checkeds = _items.where((a)=> a.checked).length;
   }
 
   //領取作業 for 未指派/已指派
@@ -104,14 +112,14 @@ and save_flag=${widget.actEnum == WoActEnum.unUpload ? 1 : 0}
     if (!hasCheckeds(list)) return;
 
     //call action & check result
-    await HttpUt.getJsonAsync(context, 'api/Project/Picks', false, { 'list': list }, (result) async {
+    await HttpUt.getJsonAsync(context, 'api/${_dto.ctrl}/Picks', false, { 'list': list }, (result) async {
       String? data = Xp.getResult(result);
       if (data == null) return;
 
       //insert local db
       var count = 0;
       var ids = data.split(',');
-      for(var row in _rows){
+      for(var row in _items){
         if (row.checked && ids.contains(row.id)){
           var tab = ProjectTab(
             id: row.id, 
@@ -158,6 +166,7 @@ and save_flag=${widget.actEnum == WoActEnum.unUpload ? 1 : 0}
     }
   }
 
+  //是否有選取資料
   bool hasCheckeds(String list){
     var empty = (list == '');
     if (empty){
@@ -167,7 +176,7 @@ and save_flag=${widget.actEnum == WoActEnum.unUpload ? 1 : 0}
   }
 
   String getCheckedList(bool comma){
-    return _rows.where((a) => a.checked)
+    return _items.where((a) => a.checked)
       .map((a) => comma ? "'${a.id}'" : a.id)
       .toList()
       .join(',');
@@ -180,10 +189,10 @@ and save_flag=${widget.actEnum == WoActEnum.unUpload ? 1 : 0}
     if (!hasCheckeds(list)) return;
 
     var sql = '''
-select * from project
+select * from ${_dto.table}
 where id in ($list)
 ''';
-    var jsons = await DbUt.getMapsAsync(sql);
+    var jsons = await DbUt.getJsonsAsync(sql);
     var rows = jsons.map((a) => ProjectTab.fromJson(a)).cast<ProjectTab>().toList(); //has cast<>
     await Xp.sendAuditRowsAsync(context, rows, (){
       //回上個畫面
@@ -202,7 +211,7 @@ where id in ($list)
     //update server db
     //call action & check result
     var data = { 'list': list.replaceAll("'", '') };  //後端不需要引號
-    await HttpUt.getJsonAsync(context, 'api/Project/Cancels', false, data, (result) async {
+    await HttpUt.getJsonAsync(context, 'api/${_dto.ctrl}/Cancels', false, data, (result) async {
       String? data = Xp.getResult(result);
       if (data == null) return;
 
@@ -227,12 +236,13 @@ where id in ($list)
   /// @rows source rows
   /// @act C(checkbox),E(編輯),V(檢視)
   /// @return list widget
-  void widgetsAddRows(List<Widget> widgets, List<ProjectItemDto> rows, 
+  List<Widget> rowsToWidgets(List<ProjectItemDto> rows, 
     bool showCheck, String? editFun, bool fromServer) {
     //if (rows.isEmpty) return WG2.emptyMsg();
 
     var address = addressCtrl.text;
     //var isEdit = (btnType == 'E');
+    List<Widget> items = [];
     for (int i = 0; i < rows.length; i++) {
       //過濾地址
       var row = rows[i];
@@ -242,10 +252,10 @@ where id in ($list)
 
       //add checkbox or text
       var statusName = Xp.getWoStatusName(row.status);
-      widgets.add(
+      items.add(
         showCheck 
           ? SizedBox(
-              height: 35,
+              height: 32, //限制高度, 否則太高
               child: WG.icheck(statusName, row.checked, (value){
                 setState(()=> row.checked = value);
             }))
@@ -253,7 +263,7 @@ where id in ($list)
       );
 
       //add text with onclick function
-      widgets.add(InkWell(
+      items.add(InkWell(
         onTap: (editFun == null)
           ? null
           : ()=> onEditAsync(row.id, row.workClassId, (editFun == 'E'), fromServer),
@@ -265,8 +275,9 @@ where id in ($list)
             WG.getText(row.workOrderNo),
         ])));
 
-      widgets.add(WG2.divider());
+      items.add(WG2.divider());
     }
+    return items;
   }
 
   @override
@@ -316,6 +327,7 @@ where id in ($list)
           _areaId = value;
           await showAsync();
       });
+
     //body, value參數配合 projectPicksToWidgets()
     List<Widget> widgets = [
       Table(
@@ -329,9 +341,20 @@ where id in ($list)
             fnOnChange: (value)=> setState((){}))
     ])];
 
-    //add rows
+    //add rows, 使用Expanded(最外面)讓多筆資料捲動, 然後SingleChildScrollView
     widgets.add(WG2.vGap());
-    widgetsAddRows(widgets, _rows, showCheck, editFun, fromServer);
+    var items = rowsToWidgets(_items, showCheck, editFun, fromServer);
+    if (items.isNotEmpty){
+      widgets.add(
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: items
+      )))));
+    }
 
     //add tail button if need
     if (actEnum == WoActEnum.unAssign || actEnum == WoActEnum.assigned) {
@@ -352,7 +375,7 @@ where id in ($list)
 
     return Scaffold(
       appBar: WG2.appBar(title),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

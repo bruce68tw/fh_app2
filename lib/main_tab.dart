@@ -20,6 +20,8 @@ class _MainTabState extends State<MainTab> {
       child: Scaffold(
         appBar: AppBar(
           title: TabBar(
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
             labelStyle: WG2.titleLabelStyle(),
             tabs: const [
               Tab(text: '空品'),

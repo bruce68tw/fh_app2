@@ -2,8 +2,8 @@ import 'package:fh_app2/project_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
 import 'all_com.dart';
-import 'models/project_dto.dart';
-import 'project_items.dart';
+//import 'models/project_dto.dart';
+import 'wo_list.dart';
 
 /// base widget class for 專案,DCU,FAN
 /// 因為先做專案, 所以使用 project0 做為基底類別
@@ -27,6 +27,8 @@ class Project0State<T extends Project0> extends State<T> {
   late List<int> unUpload;    //未上傳
   late List<int> auditings;   //當日完工待審核
 
+  //List<IdStrDto> areas = [];
+
   //權限, 陣列元素取最大值4
   final List<bool> funAdds = [false,false,false,false];    //新增按鈕
   //final List<bool> funViews = [false,false,false,false];   //檢視統計數字內容
@@ -44,6 +46,8 @@ class Project0State<T extends Project0> extends State<T> {
   /// 顯示統計表格
   Widget table()=> Container(); 
 
+  /// 讀取 locale 的統計數字
+  Future<List<Map<String, dynamic>>> getLocaleCountAsync(String areaId, int saveFlag) async => [];
   /// === 子類別實作 end ===
 
 
@@ -66,7 +70,7 @@ class Project0State<T extends Project0> extends State<T> {
       'getBase': _isOk ? '0' : '1', //must be string !!
       'areaId': _areaId, 
     };
-    await HttpUt.getJsonAsync(context, 'api/Project/PageCount', false, data, (result) async {
+    await HttpUt.getJsonAsync(context, 'api/${_dto.ctrl}/PageCount', false, data, (result) async {
       var json = Xp.getResult(result);
       if (json == null) return;
 
@@ -74,14 +78,15 @@ class Project0State<T extends Project0> extends State<T> {
       if (!_isOk){
         //設定下拉式欄位內容
         //_classIds = json['ClassIds'];
-        Xp.areas = JsonUt.rowsToIdStrs(json['Areas']);
-        Xp.areas.insert(0, IdStrDto(id:'', str:'全部'));
+        var areas = JsonUt.rowsToIdStrs(json['Areas']);
+        areas.insert(0, IdStrDto(id:'', str:'全部'));
+        Xp.areas = areas; //set global !!
 
-        Xp.workClasses = JsonUt.rowsToIdStrs(json['WorkClasses']);  //for dropdown
-        Xp.dispatches = JsonUt.rowsToIdStrs(json['Dispatches']);
-        Xp.closes = JsonUt.rowsToIdStrs(json['Closes']);
+        //Xp.workClasses = JsonUt.rowsToIdStrs(json['WorkClasses']);  //for dropdown
+        //Xp.dispatches = JsonUt.rowsToIdStrs(json['Dispatches']);
+        //Xp.closes = JsonUt.rowsToIdStrs(json['Closes']);
         //has ext(closeReasonId)
-        Xp.closeDetails = JsonUt.rowsToIdStrs2(json['CloseDetails']);
+        //Xp.closeDetails = JsonUt.rowsToIdStrs2(json['CloseDetails']);
 
         wcLen = _dto.wcIds.length;
         /*
@@ -116,11 +121,11 @@ class Project0State<T extends Project0> extends State<T> {
 
       //設定統計數字      
       setCount(unAssigns, List<Map>.from(json['New']));  //未指派
-      setCount2(List<Map>.from(json['NotNew']));  //已指派, 待審核
+      setCount2(List<Map>.from(json['NotNew']));  //已指派, 完工待審核
 
       //讀取 sqlLite      
-      setCount(pickeds, await getLocaleMapsAsync(_areaId, 0));   //已領取
-      setCount(unUpload, await getLocaleMapsAsync(_areaId, 1));  //未上傳
+      setCount(pickeds, await getLocaleCountAsync(_areaId, 0));   //已領取
+      setCount(unUpload, await getLocaleCountAsync(_areaId, 1));  //未上傳
 
       setState(()=> _isOk = true); //call build()
     }, null, false);
@@ -135,27 +140,14 @@ class Project0State<T extends Project0> extends State<T> {
     auditings = [0,0,0,0];
   }
 
-  //讀取 locale 的統計數字
-  Future<List<Map<String, dynamic>>> getLocaleMapsAsync(String areaId, int saveFlag) async {
-
-    //欄位名稱為 ClassId,Count(配合 setCount())
-    var sql = '''
-select
-  work_class_id as ClassId,
-  count(*) as Count
-from ${_dto.table} 
-where ('$areaId'='' or area_id='$areaId')
-and save_flag=$saveFlag
-group by work_class_id
-''';
-    return await DbUt.getMapsAsync(sql);
-  }
-
   //設定統計數字(未指派,未上傳)
   void setCount(List<int> srcList, List<Map> jsons){
-    for (var json in jsons){   
+    for (var json in jsons){
+      var wcId = json['WorkClassId'];
+      if (wcId == null) continue;
+      
       //find classIds   
-      var find = _dto.wcIds.indexOf(json['ClassId']);
+      var find = _dto.wcIds.indexOf(wcId);
       if (find >= 0) {
         srcList[find] = json['Count'];
       }
@@ -194,7 +186,8 @@ group by work_class_id
   }
 
   Future<void> openItemsAsync(String wsId, int actEnum) async {
-    var msg = await ToolUt.openFormAsync(context, ProjectItems(areaId:_areaId, wcId:wsId, actEnum:actEnum)) ?? '';
+    var msg = await ToolUt.openFormAsync(context, WoList(dto:_dto, 
+      areaId:_areaId, wcId:wsId, actEnum:actEnum)) ?? '';
     if (msg != ''){
       ToolUt.msg(context, msg); //first
       await showAsync();

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
 //import 'package:path/path.dart';
 import '../enums/all.dart';
+import '../models/all.dart';
 import '../tables/project_tab.dart';
 
 /// static class
@@ -147,6 +148,11 @@ class Xp {
         hasFile ? File(zipFile) : null, data, true, (result) async {
       if (!checkResultError(context, result)) return;
 
+      //delete project row
+      await ProjectTab.deleteAsync(row.id);
+
+      //if (fnOk != null) fnOk(getResult(result));
+
       //callback
       if (fnOk != null) fnOk();
     }, showWait);
@@ -233,6 +239,12 @@ class Xp {
       case WorkStatusEnum.waitClose: return 'waitClose';
       default: return '處理中';
     }
+  }
+
+  static String getLocaleTable(ProjectDto dto, String table2){
+    return dto.tableTail 
+      ? dto.table + '_' + table2
+      : dto.table;
   }
 
 } //class

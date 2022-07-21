@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:base_lib/all.dart';
+//import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:image/image.dart';
 import 'all_com.dart';
 import 'login.dart';
 
 void main() {
   runApp(const MainApp());
+  //runApp(const ProviderScope(child: MainApp()));
 }
 
 /// This Widget is the main application widget.
@@ -24,7 +26,7 @@ class MainApp extends StatelessWidget {
         //primaryColor: titleBgColor,
         //primarySwatch: MaterialColor(0xFFA7D55B, null),
         appBarTheme: const AppBarTheme(
-          //backgroundColor: Colors.green, //Color(0xFFA7D55B),
+          foregroundColor: Colors.black,
           backgroundColor: bgColor,
         ),
         textTheme: const TextTheme(
@@ -92,6 +94,8 @@ class _MainFormState extends State<MainForm> {
       child: Scaffold(
         appBar: AppBar(
           title: TabBar(
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
             labelStyle: WG2.titleLabelStyle(),
             tabs: const [
               Tab(text: '登入'),

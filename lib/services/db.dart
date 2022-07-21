@@ -5,8 +5,23 @@ class Db {
 
   /// project.save_flag: 0(未儲存,表示已領取), 1(有儲存,表示未上傳)
   /// 領取時必須設定 save_flag=0
+  /// project的前面6個欄位為project_items通用
   static void init() {
     DbUt.init('FH.db', 2, ['''
+Create Table config(
+  id Text Primary Key, 
+  show_name Integer,
+  show_work_date Integer,
+  show_latitude Integer,
+  show_longitude Integer,
+  show_address Integer,
+  show_location Integer,
+  show_other1 Integer,
+  show_other2 Integer,
+  show_other3 Integer,
+  account Text,
+  login_radio Integer)
+''','''
 Create Table project(
   id Text Primary Key, 
   name Text,
@@ -22,25 +37,32 @@ Create Table project(
   work_date Text,
   address Text,
   location Text,
-  signal Integer,
+  signal Text,
   note Text,
   other1 Text,
   other2 Text,
   other3 Text)
 ''','''
-Create Table config(
+Create Table fan_check(
   id Text Primary Key, 
-  show_name Integer,
-  show_work_date Integer,
-  show_latitude Integer,
-  show_longitude Integer,
-  show_address Integer,
-  show_location Integer,
-  show_other1 Integer,
-  show_other2 Integer,
-  show_other3 Integer,
-  account Text,
-  login_radio Integer)
+  name Text,
+  work_order_no Text,
+  save_flag Integer not null default 0,
+  area_id Text,
+  work_class_id Text,
+  work_dispatch_id Text,
+  close_reason_id Text,
+  close_reason_detail_id Text,
+  latitude Real,
+  longitude Real,
+  work_date Text,
+  address Text,
+  location Text,
+  signal Text,
+  note Text,
+  other1 Text,
+  other2 Text,
+  other3 Text)
 ''']);
   }
 

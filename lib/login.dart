@@ -63,7 +63,19 @@ class _LoginState extends State<Login> {
     await HttpUt.getJsonAsync(context, 'api/Authorize/Login', true, data, (result){
       if (!Xp.checkResultError(context, result)) return;
 
-      HttpUt.setToken(Xp.getResult(result));  //後端包了兩層 !!
+      var json = Xp.getResult(result);  //後端包了兩層 !!
+      HttpUt.setToken(json['Token']);  
+
+      //設定下拉欄位資料
+      //Xp.areas = JsonUt.rowsToIdStrs(json['Areas']);
+      //Xp.areas.insert(0, IdStrDto(id:'', str:'全部'));
+
+      Xp.workClasses = JsonUt.rowsToIdStrs(json['WorkClasses']);  //for dropdown
+      Xp.dispatches = JsonUt.rowsToIdStrs(json['Dispatches']);
+      Xp.closes = JsonUt.rowsToIdStrs(json['Closes']);
+      //has ext(closeReasonId)
+      Xp.closeDetails = JsonUt.rowsToIdStrs2(json['CloseDetails']);
+
       ToolUt.openForm(context, MainTab(actType: _actType));
     });
   }

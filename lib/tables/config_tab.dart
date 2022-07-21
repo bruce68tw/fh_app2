@@ -67,7 +67,7 @@ class ConfigTab {
   }
   
   static Future<Map<String, dynamic>?> getJsonAsync() async {
-    return await DbUt.getMapAsync("select * from config where id='1'");
+    return await DbUt.getJsonAsync("select * from config where id='1'");
   }
 
   static Future<ConfigTab?> getAsync() async {
